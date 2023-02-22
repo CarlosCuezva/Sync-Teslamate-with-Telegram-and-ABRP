@@ -1,15 +1,15 @@
 [
     {
-        "id": "88633c3e.1b273",
+        "id": "ec17eebe56a5b333",
         "type": "tab",
         "label": "Tesla",
         "disabled": false,
         "info": ""
     },
     {
-        "id": "5bf1c557.464144",
+        "id": "19cc5ae16ca494c6",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "state changes",
         "func": "let new_state = msg.payload;\nlet previous_state = flow.get('state');\n\n//node.warn(msg.topic + \": \" + msg.payload);\n//flow.set(msg.topic, new_state);\n\nif (previous_state !== new_state){\n    if (new_state === \"online\"){\n        msg.topic = `✨ está despierto`;\n    }else if (new_state === \"asleep\"){\n        msg.topic = `💤 está dormido`;\n        flow.set('sent_resumen','0');\n    }else if (new_state === \"suspended\"){\n        msg.topic = `🛏️ está durmiéndose`;\n    }else if (new_state === \"charging\"){\n        msg.topic = `🔌 está cargando`;\n    }else if (new_state === \"offline\"){\n        msg.topic = `🛰️ no está conectado`;\n    }else if (new_state === \"start\"){\n        msg.topic = `🚀 está arrancando`;\n    }else if (new_state === \"driving\"){\n        msg.topic = `🏁 está en marcha`;\n    }else{\n        msg.topic = `⭕ con estado desconocido`;\n    }\n}else{\n    return;\n}\nreturn msg;\n",
         "outputs": 1,
@@ -17,37 +17,18 @@
         "initialize": "// Code added here will be run once\n// whenever the node is deployed.\nflow.set('state','asleep');\nflow.set('sent_resumen','1');",
         "finalize": "",
         "libs": [],
-        "x": 400,
-        "y": 200,
-        "wires": [
-            [
-                "72f5716b5fa3d0b9"
-            ]
-        ]
-    },
-    {
-        "id": "72d2c21.f2a2e3c",
-        "type": "function",
-        "z": "88633c3e.1b273",
-        "name": "geofence",
-        "func": "let previous_fence = flow.get('geofence');\nlet new_fence = msg.payload;\n//flow.set('geofence',new_fence);\nmsg.topic = '';\n\nif(previous_fence !== new_fence){\n    if(previous_fence !== \"\"){\n        msg.topic = `sale de la zona <b>${previous_fence}</b>`;\n    }\n    if(new_fence !== \"\"){\n        if(previous_fence !== \"\"){\n            msg.topic += ' y ';\n        }\n        msg.topic += `entra en la zona <b>${new_fence}</b>`;\n    }\n} else return null;\nreturn msg;\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "// Code added here will be run once\n// whenever the node is deployed.\nflow.set('geofence','Casa');",
-        "finalize": "",
-        "libs": [],
-        "x": 380,
+        "x": 420,
         "y": 260,
         "wires": [
             [
-                "8094b1d4.32f968"
+                "c0ecaad47a7cf0a4"
             ]
         ]
     },
     {
-        "id": "8094b1d4.32f968",
+        "id": "7f48d1af0e320734",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "Format message",
         "func": "let display_name = flow.get('display_name');\n\nmsg.payload = {\n    chatId: flow.get('telegram_chatId'),\n    type: 'message',\n    content: `<b>${display_name}</b> ${msg.topic}`\n}\nmsg.payload.options = {parse_mode : \"HTML\", disable_web_page_preview: true};\n\nreturn msg;",
         "outputs": 1,
@@ -59,14 +40,14 @@
         "y": 280,
         "wires": [
             [
-                "eb20a524.af3ba"
+                "6e5d983ad3f24957"
             ]
         ]
     },
     {
-        "id": "eb20a524.af3ba",
+        "id": "6e5d983ad3f24957",
         "type": "telegram sender",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "Status messages",
         "bot": "ed12f72a.03fad",
         "haserroroutput": false,
@@ -78,9 +59,9 @@
         ]
     },
     {
-        "id": "9a548f9d07aa83dc",
+        "id": "e2527437bfb6feac",
         "type": "switch",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "property": "topic",
         "propertyType": "msg",
@@ -92,91 +73,60 @@
             },
             {
                 "t": "eq",
-                "v": "geofence",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "time_to_full_charge",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
                 "v": "update_version",
                 "vt": "str"
             }
         ],
         "checkall": "true",
         "repair": false,
-        "outputs": 4,
+        "outputs": 2,
         "x": 170,
         "y": 300,
         "wires": [
             [
-                "5bf1c557.464144"
+                "19cc5ae16ca494c6"
             ],
-            [],
-            [],
             [
-                "eb8be7ae05ca84f9"
+                "8b4e1c1ddfe303a4"
             ]
         ]
     },
     {
-        "id": "be03e4a1ea6d56a6",
+        "id": "8b4e1c1ddfe303a4",
         "type": "function",
-        "z": "88633c3e.1b273",
-        "name": "time to full charge",
-        "func": "//node.warn(msg.topic + \": \" + msg.payload);\n\nlet previous = flow.get('time_to_full_charge');\nif(flow.get('state') !== 'charging' || \n    previous.timeleft === msg.payload){\n        //node.warn('returned from 1 ' + flow.get('state'))\n        return;\n}\n\nlet now = Math.round(Date.now()/1000);\nlet current = { timestamp: now, timeleft: msg.payload};\nlet remaining = msg.payload.split('.');\nlet minutes = Math.ceil(60 * Number(\".\" + remaining[1]));\n\n// If more than 1 hour remaining, print max 1 time per 15 minutes\nif(remaining[0] > 0 && (now - previous.timestamp)/60 <= 15)\n    return;\n// If less than 1 hour remaining, print max 1 time per 5 minutes\nif(remaining[0] == 0 && (now - previous.timestamp)/60 < 5)\n    return;\n    \nlet how_long = \"\";\nif(remaining[0] > 0){\n    how_long = `${remaining[0]} horas ${minutes} minutos`\n} else {\n    how_long = `${minutes} minutos`\n}\nflow.set('time_to_full_charge',current);\nmsg.topic = `estará cargado en <b>${how_long}</b>`;\n\nreturn msg;",
+        "z": "ec17eebe56a5b333",
+        "name": "update",
+        "func": "let payload = msg.payload;\nlet current_version = flow.get('software_current_version');\nlet new_version = flow.get('software_new_version');\n\n//node.warn(msg.topic + \": \" + msg.payload);\n\nif (payload !== \"\" && payload !== current_version && payload !== new_version){\n    msg.topic = `🎁 tiene actualización disponible: <a href=\"https://www.notateslaapp.com/software-updates/version/${payload}/release-notes\"><i>${payload}</i></a>`;\n    //flow.set('software_new_version', payload);\n}else{\n    return;\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "initialize": "// Code added here will be run once\n// whenever the node is deployed.\nflow.set('time_to_full_charge',{timestamp:0,timeleft:0});\n",
+        "initialize": "// Code added here will be run once\n// whenever the node is deployed.",
         "finalize": "",
         "libs": [],
         "x": 410,
         "y": 320,
         "wires": [
             [
-                "8094b1d4.32f968"
+                "7f48d1af0e320734"
             ]
         ]
     },
     {
-        "id": "eb8be7ae05ca84f9",
-        "type": "function",
-        "z": "88633c3e.1b273",
-        "name": "update",
-        "func": "let payload = msg.payload;\nlet current_version = flow.get('software_current_version');\nlet new_version = flow.get('software_new_version');\n\n//node.warn(msg.topic + \": \" + msg.payload);\n\nif (payload !== \"\" && payload !== current_version && payload !== new_version){\n    msg.topic = `🎁 tiene actualización disponible: <i>${payload}</i>`;\n    //flow.set('software_new_version', payload);\n}else{\n    return;\n}\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "// Code added here will be run once\n// whenever the node is deployed.",
-        "finalize": "",
-        "libs": [],
-        "x": 370,
-        "y": 380,
-        "wires": [
-            [
-                "8094b1d4.32f968"
-            ]
-        ]
-    },
-    {
-        "id": "72f5716b5fa3d0b9",
+        "id": "c0ecaad47a7cf0a4",
         "type": "link out",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "change-state",
         "mode": "link",
         "links": [
-            "cfc315a9a7900e62"
+            "f817850fcd58c124"
         ],
-        "x": 545,
-        "y": 100,
+        "x": 585,
+        "y": 180,
         "wires": []
     },
     {
-        "id": "1b58604f23390343",
+        "id": "c5964945b20914ba",
         "type": "delay",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "pauseType": "delay",
         "timeout": "5",
@@ -194,14 +144,14 @@
         "y": 600,
         "wires": [
             [
-                "56ce089ed25074aa"
+                "83e2d9bd36f60d76"
             ]
         ]
     },
     {
-        "id": "8fc0e401e5c4ad58",
+        "id": "1f304f0624224c66",
         "type": "switch",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "property": "payload",
         "propertyType": "msg",
@@ -237,26 +187,26 @@
         "y": 840,
         "wires": [
             [
-                "756def945eb147c6"
+                "d73261814ab8e538"
             ],
             [
-                "e8ec753ea439c54b"
+                "1f130cd0d1818594"
             ],
             [
-                "93f00016d83dcf31"
+                "b23e320ab1d0869d"
             ],
             [
-                "93f00016d83dcf31"
+                "b23e320ab1d0869d"
             ],
             [
-                "ca2eed2cbf642287"
+                "82a8d89db923d127"
             ]
         ]
     },
     {
-        "id": "e8ec753ea439c54b",
+        "id": "1f130cd0d1818594",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "set parameters",
         "func": "const USER_TOKEN = flow.get('abrp_user_token');\nconst CAR_MODEL = flow.get('abrp_car_model');\nconst API_KEY = flow.get('abrp_api_key');\n\nlet data = {\n    utc: Math.floor(Date.now() / 1000),\n    soc: flow.get('usable_battery_level') || 0,\n    power: flow.get('power') || 0,\n    speed: flow.get('speed') || 0,\n    lat: flow.get('latitude') || 0,\n    lon: flow.get('longitude') || 0,\n    is_charging: false,\n    is_dcfc: false,\n    is_parked: false,\n    heading: flow.get('heading') || 0,\n    elevation: flow.get('elevation') || 0,\n    ext_temp: flow.get('outside_temp') || 0,\n    voltage: flow.get('charger_voltage') || 0,\n    current: flow.get('charger_actual_current') || 0,\n    odometer: flow.get('odometer') || 0,\n    est_battery_range: flow.get('rated_battery_range_km') || 0,\n    kwh_charged: flow.get('charge_energy_added') || 0,\n    car_model: CAR_MODEL\n};\nlet state = flow.get('state');\n\nswitch(state) {\n    case 'driving':\n        data.is_parked = false\n        data.is_charging = false\n        data.is_dcfc = false\n        break;\n    case 'charging':\n        data.is_parked = true\n        data.is_charging = true\n        data.is_dcfc = true\n        break;\n    default:\n        data.is_parked = true\n        data.is_charging = false\n        data.is_dcfc = false\n}\n\nif (parseInt(flow.get('charger_power') > 0)){\n    data.is_charging = true\n}\n\nswitch (flow.get('shift_state')) {\n    case 'P':\n    case 'N':\n        data.is_parked = true\n        break;\n    case 'D':\n    case 'R':\n        data.is_parked = false\n        break;\n}\n\nif (state !== \"charging\"){\n    delete data.kwh_charged;\n    delete data.voltage;\n}\n\nmsg.headers={ \n    'Content-Type': 'application/json',\n    'Authorization': 'APIKEY ' + API_KEY\n};\n//msg.payload = {};\nmsg.payload = {tlm: data};\nmsg.userToken = USER_TOKEN;\n\nreturn msg;",
         "outputs": 1,
@@ -268,14 +218,14 @@
         "y": 860,
         "wires": [
             [
-                "96d7b1916ecbb314"
+                "14a7f7a37daf24a5"
             ]
         ]
     },
     {
-        "id": "96d7b1916ecbb314",
+        "id": "14a7f7a37daf24a5",
         "type": "http request",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "method": "POST",
         "ret": "obj",
@@ -292,14 +242,14 @@
         "y": 840,
         "wires": [
             [
-                "2b83902a7f170aab"
+                "142317b059a97879"
             ]
         ]
     },
     {
-        "id": "56ce089ed25074aa",
+        "id": "83e2d9bd36f60d76",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "get car state",
         "func": "let previous_state = flow.get('previous_state');\nlet current_state = flow.get('state');\n\n//node.warn(previous_state + \" : \" + current_state);\n\nif (previous_state !== current_state){\n    flow.set('previous_state', current_state);\n    flow.set('i', 300);\n}\n\nmsg.payload = current_state;\n\nreturn msg;",
         "outputs": 1,
@@ -311,30 +261,30 @@
         "y": 600,
         "wires": [
             [
-                "8fc0e401e5c4ad58"
+                "1f304f0624224c66"
             ]
         ]
     },
     {
-        "id": "cfc315a9a7900e62",
+        "id": "f817850fcd58c124",
         "type": "link in",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "abrp",
         "links": [
-            "72f5716b5fa3d0b9"
+            "c0ecaad47a7cf0a4"
         ],
         "x": 625,
         "y": 540,
         "wires": [
             [
-                "56ce089ed25074aa"
+                "83e2d9bd36f60d76"
             ]
         ]
     },
     {
-        "id": "ca2eed2cbf642287",
+        "id": "82a8d89db923d127",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "set counter",
         "func": "let i=parseInt(flow.get('i'));\ni +=1;\n\nif (i > 300){\n    i = 0;\n}\n\nflow.set('i',i);\nreturn msg;",
         "outputs": 1,
@@ -346,14 +296,14 @@
         "y": 600,
         "wires": [
             [
-                "1b58604f23390343"
+                "c5964945b20914ba"
             ]
         ]
     },
     {
-        "id": "42a7d99ab0b34340",
+        "id": "5ccf6820b737c553",
         "type": "inject",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "Start ABRP",
         "props": [
             {
@@ -371,14 +321,14 @@
         "y": 600,
         "wires": [
             [
-                "ca2eed2cbf642287"
+                "82a8d89db923d127"
             ]
         ]
     },
     {
-        "id": "2b83902a7f170aab",
+        "id": "142317b059a97879",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "reset counter",
         "func": "let i=parseInt(flow.get('i'));\n\nif (i > 30){\n    flow.set('i',-1);\n}\n\nreturn msg;",
         "outputs": 1,
@@ -390,14 +340,14 @@
         "y": 720,
         "wires": [
             [
-                "ca2eed2cbf642287"
+                "82a8d89db923d127"
             ]
         ]
     },
     {
-        "id": "756def945eb147c6",
+        "id": "d73261814ab8e538",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "delay 10 segs",
         "func": "let i=parseInt(flow.get('i'));\n\nif (i % 2 === 0){\n    msg.payload = true;\n}else{\n    msg.payload = false;\n}\nreturn msg;\n",
         "outputs": 1,
@@ -409,14 +359,14 @@
         "y": 800,
         "wires": [
             [
-                "c1344029360e97c5"
+                "10d16ed647feb51d"
             ]
         ]
     },
     {
-        "id": "93f00016d83dcf31",
+        "id": "b23e320ab1d0869d",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "delay 2,5 min",
         "func": "let i=parseInt(flow.get('i'));\n\n//node.warn(\"Valor de 'i': \" + i);\n\nif (i % 30 === 0){\n    msg.payload = true;\n}else{\n    msg.payload = false;\n}\nreturn msg;\n",
         "outputs": 1,
@@ -428,14 +378,14 @@
         "y": 880,
         "wires": [
             [
-                "c1344029360e97c5"
+                "10d16ed647feb51d"
             ]
         ]
     },
     {
-        "id": "c1344029360e97c5",
+        "id": "10d16ed647feb51d",
         "type": "switch",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "property": "payload",
         "propertyType": "msg",
@@ -454,17 +404,17 @@
         "y": 760,
         "wires": [
             [
-                "e8ec753ea439c54b"
+                "1f130cd0d1818594"
             ],
             [
-                "2b83902a7f170aab"
+                "142317b059a97879"
             ]
         ]
     },
     {
-        "id": "649185631e9b3fa8",
+        "id": "17c47461b2242f6d",
         "type": "mqtt in",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "topic": "teslamate/cars/1/#",
         "qos": "2",
@@ -477,14 +427,14 @@
         "y": 120,
         "wires": [
             [
-                "c0e494e39beae256"
+                "7697a10146e64a64"
             ]
         ]
     },
     {
-        "id": "8b1b3799b71fb31f",
+        "id": "111f31a1e35aefeb",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "short topic",
         "func": "var short_topic = msg.topic.substring(17);\nmsg.topic = short_topic;\nflow.set(msg.topic, msg.payload);\n//node.warn(msg.topic + \": \" + msg.payload);\nreturn msg;",
         "outputs": 1,
@@ -496,14 +446,14 @@
         "y": 240,
         "wires": [
             [
-                "9a548f9d07aa83dc"
+                "e2527437bfb6feac"
             ]
         ]
     },
     {
-        "id": "e21b094ab4611798",
+        "id": "82af5994b41f93bd",
         "type": "comment",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "MQTT to Telegram",
         "info": "",
         "x": 110,
@@ -511,9 +461,9 @@
         "wires": []
     },
     {
-        "id": "d8fe2ffa5621ddf5",
+        "id": "5d44b1df05d63a7c",
         "type": "comment",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "MQTT to ABRP",
         "info": "",
         "x": 120,
@@ -521,9 +471,9 @@
         "wires": []
     },
     {
-        "id": "c62189d9979b678c",
+        "id": "5e49a2b62522c708",
         "type": "telegram command",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "/hola",
         "command": "/hola",
         "description": "",
@@ -540,15 +490,15 @@
         "y": 1120,
         "wires": [
             [
-                "feb401f202d66b98",
-                "9ef367904bb9e5b0"
+                "920747ae205dc8b1",
+                "9091f925f8d0a46d"
             ]
         ]
     },
     {
-        "id": "7ca82d217a60ec16",
+        "id": "4dbef57329e1e66b",
         "type": "telegram event",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "bot": "ed12f72a.03fad",
         "event": "callback_query",
@@ -557,15 +507,15 @@
         "y": 1340,
         "wires": [
             [
-                "7de84f600fecf70c",
-                "2b2b3ad91028850e"
+                "be7157e61e51e6b0",
+                "6f5060a206a9e6d6"
             ]
         ]
     },
     {
-        "id": "7de84f600fecf70c",
+        "id": "be7157e61e51e6b0",
         "type": "switch",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "property": "payload.content",
         "propertyType": "msg",
@@ -588,19 +538,19 @@
         "y": 1340,
         "wires": [
             [
-                "7f82c79a9adeeab7"
+                "c2af1d558f1c3e2d"
             ],
             [
-                "8afa2e662a5eda7c"
+                "ab6cd7fc8bbec45e"
             ]
         ]
     },
     {
-        "id": "7f82c79a9adeeab7",
+        "id": "c2af1d558f1c3e2d",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "global summary",
-        "func": "/* temporarly disable */\n//return;\n\n\nlet bat = '';\nlet geo = '';\nlet state = '';\nlet inside_temp = flow.get('inside_temp');\nlet outside_temp = flow.get('outside_temp');\nlet battery_level = flow.get('battery_level');\nlet usable_battery_level = flow.get('usable_battery_level');\nlet geofence = flow.get('geofence');\nlet latitude = flow.get('latitude');\nlet longitude = flow.get('longitude');\nlet last_status_change = new Date(flow.get('since'));\nlet sentry_mode = '';\n\nfunction calc_difference(){\n  let diffInMilliSeconds = Math.abs(new Date().getTime() - new Date(flow.get('since')).getTime()) / 1000;\n\n  // calculate days\n  const days = Math.floor(diffInMilliSeconds / 86400);\n  diffInMilliSeconds -= days * 86400;\n\n  // calculate hours\n  const hours = Math.floor(diffInMilliSeconds / 3600) % 24;\n  diffInMilliSeconds -= hours * 3600;\n\n  // calculate minutes\n  const minutes = Math.floor(diffInMilliSeconds / 60) % 60;\n  diffInMilliSeconds -= minutes * 60;\n\n  let difference = '';\n  if (days > 0) {\n    difference += `${days}d `;\n  }\n  if (hours > 0) {\n    difference += `${hours}h `;\n  }\n\n  difference += `${minutes}m`;\n\n  return difference;\n\n}\n\nfunction toFloat(num, precision){\n  return parseFloat(num).toFixed(precision);\n}\n\n/**\n* @param {number} percent\n*/\nfunction getBatteryIcon(percent){\n  let ico = `🔋 `;\n  if (percent <= 40) {\n    ico = `🪫 `;\n  }\n  return ico;\n}\n\nswitch(flow.get('state')) {\n  case \"online\":\n    state = 'Despierto'\n    break;\n  case \"asleep\":\n    state = `Dormido hace ${calc_difference()}`\n    break;\n  case \"suspended\":\n    state = `Durmiéndose desde hace ${calc_difference()}`\n    break;\n  case \"charging\":\n    state = 'Cargando'\n    break;\n  case \"offline\":\n    state = 'Desconectado'\n    break;\n  case \"start\":\n    state = 'Arrancando'\n    break;\n  case \"driving\":\n    state = 'Conduciendo'\n    break;\n  default:\n    state = 'Desconocido'\n}\n\nbat = getBatteryIcon(usable_battery_level);\nif (usable_battery_level !== battery_level){\n  bat += ` Usable ${usable_battery_level}% (disponible ${battery_level}%) - ${flow.get('rated_battery_range_km')} km`;\n}else{\n  bat += ` Disponible ${usable_battery_level}% - ${flow.get('rated_battery_range_km')} km`;\n}\n\nif (geofence !== \"\" && geofence !== undefined){\n  geo = `Está en <a href=\"https://maps.google.com/maps?q=${latitude},${longitude}\">${geofence}</a>`;\n}else{\n  geo = `Está en <a href=\"https://maps.google.com/maps?q=${latitude},${longitude}\">Lat: ${latitude}, Long: ${longitude}</a>`;\n}\n\nif (flow.get('sentry_mode') === \"true\"){\n  sentry_mode = `🟢  Centinela activado`;\n}else{\n  sentry_mode = `⚫️  Centinela desactivado`;\n}\n    \nmsg.topic = `*** Resumen general ***\n\n    💿  <a href=\"https://www.notateslaapp.com/software-updates/version/${flow.get('version')}/release-notes\">${flow.get('version')}</a> ${(flow.get('update_available') === 'true') ? `(disponible <a href=\"https://www.notateslaapp.com/software-updates/version/${flow.get('update_version')}/release-notes\"><i>${flow.get('update_version')}</i></a>)` : ''}\n    🚗  ${state}\n    ⚙️  ${Intl.NumberFormat('es-ES').format(parseInt(flow.get('odometer')))} km\n    🔐  ${(flow.get('locked') === \"true\")? 'Cerrado' : 'Abierto' }\n    ${bat}\n    🛞  Presión de las ruedas:\n              ${toFloat(flow.get('tpms_pressure_fl'), 3)} --- ${toFloat(flow.get('tpms_pressure_fr'), 3)}\n              ${toFloat(flow.get('tpms_pressure_rl'), 3)} --- ${toFloat(flow.get('tpms_pressure_rr'), 3)}\n    🌡️  Interior ${inside_temp}ºC\n    🌡️  Exterior ${outside_temp}ºC\n    🌎  ${geo}\n    ${sentry_mode}\n`;\n\nreturn msg;",
+        "func": "/* temporarly disable */\n//return;\n\n\nlet bat = '';\nlet geo = '';\nlet state = '';\nlet inside_temp = flow.get('inside_temp');\nlet outside_temp = flow.get('outside_temp');\nlet battery_level = flow.get('battery_level');\nlet usable_battery_level = flow.get('usable_battery_level');\nlet geofence = flow.get('geofence');\nlet latitude = flow.get('latitude');\nlet longitude = flow.get('longitude');\nlet last_status_change = new Date(flow.get('since'));\nlet sentry_mode = '';\n\nfunction calc_difference(){\n  let diffInMilliSeconds = Math.abs(new Date().getTime() - new Date(flow.get('since')).getTime()) / 1000;\n\n  // calculate days\n  const days = Math.floor(diffInMilliSeconds / 86400);\n  diffInMilliSeconds -= days * 86400;\n\n  // calculate hours\n  const hours = Math.floor(diffInMilliSeconds / 3600) % 24;\n  diffInMilliSeconds -= hours * 3600;\n\n  // calculate minutes\n  const minutes = Math.floor(diffInMilliSeconds / 60) % 60;\n  diffInMilliSeconds -= minutes * 60;\n\n  let difference = '';\n  if (days > 0) {\n    difference += `${days}d `;\n  }\n  if (hours > 0) {\n    difference += `${hours}h `;\n  }\n\n  difference += `${minutes}m`;\n\n  return difference;\n\n}\n\nfunction toFloat(num, precision){\n  return parseFloat(num).toFixed(precision);\n}\n\n/**\n* @param {number} percent\n*/\nfunction getBatteryIcon(percent){\n  let ico = `🔋 `;\n  if (percent <= 40) {\n    ico = `🪫 `;\n  }\n  return ico;\n}\n\nswitch(flow.get('state')) {\n  case \"online\":\n    state = 'Despierto'\n    break;\n  case \"asleep\":\n    state = `Dormido hace ${calc_difference()}`\n    break;\n  case \"suspended\":\n    state = `Durmiéndose desde hace ${calc_difference()}`\n    break;\n  case \"charging\":\n    state = 'Cargando'\n    break;\n  case \"offline\":\n    state = 'Desconectado'\n    break;\n  case \"start\":\n    state = 'Arrancando'\n    break;\n  case \"driving\":\n    state = 'Conduciendo'\n    break;\n  case \"updating\":\n    state = `Actualizando durante ${calc_difference()}`;\n    break;\n  default:\n    state = 'Desconocido'\n}\n\nbat = getBatteryIcon(usable_battery_level);\nif (usable_battery_level !== battery_level){\n  bat += ` Usable ${usable_battery_level}% (disponible ${battery_level}%) - ${flow.get('rated_battery_range_km')} km`;\n}else{\n  bat += ` Disponible ${usable_battery_level}% - ${flow.get('rated_battery_range_km')} km`;\n}\n\nif (geofence !== \"\" && geofence !== undefined){\n  geo = `Está en <a href=\"https://maps.google.com/maps?q=${latitude},${longitude}\">${geofence}</a>`;\n}else{\n  geo = `Está en <a href=\"https://maps.google.com/maps?q=${latitude},${longitude}\">Lat: ${latitude}, Long: ${longitude}</a>`;\n}\n\nif (flow.get('sentry_mode') === \"true\"){\n  sentry_mode = `🟢  Centinela activado`;\n}else{\n  sentry_mode = `⚫️  Centinela desactivado`;\n}\n    \nmsg.topic = `*** Resumen general ***\n\n    💿  <a href=\"https://www.notateslaapp.com/software-updates/version/${flow.get('version')}/release-notes\">${flow.get('version')}</a> ${(flow.get('update_available') === 'true') ? `(disponible <a href=\"https://www.notateslaapp.com/software-updates/version/${flow.get('update_version')}/release-notes\"><i>${flow.get('update_version')}</i></a>)` : ''}\n    🚗  ${state}\n    ⚙️  ${Intl.NumberFormat('es-ES').format(parseInt(flow.get('odometer')))} km\n    🔐  ${(flow.get('locked') === \"true\")? 'Cerrado' : 'Abierto' }\n    ${bat}\n    🛞  Presión de las ruedas:\n              ${toFloat(flow.get('tpms_pressure_fl'), 3)} --- ${toFloat(flow.get('tpms_pressure_fr'), 3)}\n              ${toFloat(flow.get('tpms_pressure_rl'), 3)} --- ${toFloat(flow.get('tpms_pressure_rr'), 3)}\n    🌡️  Interior ${inside_temp}ºC\n    🌡️  Exterior ${outside_temp}ºC\n    🌎  ${geo}\n    ${sentry_mode}\n`;\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "// Code added here will be run once\n// whenever the node is deployed.",
@@ -610,14 +560,14 @@
         "y": 1220,
         "wires": [
             [
-                "9ef367904bb9e5b0"
+                "9091f925f8d0a46d"
             ]
         ]
     },
     {
-        "id": "09be22145aa17572",
+        "id": "d39786deb2d6941d",
         "type": "telegram sender",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "send response",
         "bot": "ed12f72a.03fad",
         "haserroroutput": false,
@@ -629,9 +579,9 @@
         ]
     },
     {
-        "id": "aa2cd7c788d2fe79",
+        "id": "b621667ba09219e2",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "format message",
         "func": "let content = ((msg.topic !== undefined)? msg.topic : '') + `\n*** Opciones disponibles ***\n`;\n\nlet opts = {\n    parse_mode : \"HTML\",\n    disable_web_page_preview: true,\n    reply_markup: msg.buttons\n};\n\nmsg.payload = {\n    chatId: flow.get('telegram_chatId'),\n    type: 'message',\n    options: opts,\n    content: content\n}\n\nreturn [ msg ] ;\n",
         "outputs": 1,
@@ -643,17 +593,17 @@
         "y": 1340,
         "wires": [
             [
-                "09be22145aa17572",
-                "538adce932478f78"
+                "d39786deb2d6941d",
+                "6a4696e8856db0c5"
             ]
         ]
     },
     {
-        "id": "8afa2e662a5eda7c",
+        "id": "ab6cd7fc8bbec45e",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "recharge summary",
-        "func": "/* temporarly disable */\n//return;\n\nlet state = flow.get(\"state\");\nlet bat = '';\nlet battery_level = flow.get('battery_level');\nlet usable_battery_level = flow.get('usable_battery_level');\n\nif (usable_battery_level !== battery_level){\n    bat = `Batería usable ${usable_battery_level}% (<i>${battery_level}%</i>) - ${flow.get('rated_battery_range_km')}km`;\n}else{\n    bat = `Batería disponible ${usable_battery_level}% - ${flow.get('rated_battery_range_km')}km`;\n}\n\nif (state === \"charging\"){\n\n    // Remaining\n    let time_to_full = flow.get(\"time_to_full_charge\");\n    let now = Math.round(Date.now()/1000);\n    let remaining = time_to_full.split('.');\n    let minutes = Math.ceil(60 * Number(\".\" + remaining[1]));\n    let total_minutes = (remaining[0]*60)+minutes;\n    let finish_date = Date.now() + (total_minutes*60000);\n    let new_date = new Date(finish_date);\n    let str_new_date = new_date.toLocaleTimeString('es-ES', {timeZone: 'Europe/Madrid', hour12: false, hour: '2-digit', minute: '2-digit' })\n    \n    let how_long = \"\";\n    if(remaining[0] > 0){\n        how_long = `${remaining[0]}h ${minutes}m`\n    } else {\n        how_long = `${minutes}m`\n    }\n    \n    let voltage = \"\";\n    let amps = \"\";\n    let chargeType = '';\n    if (parseInt(flow.get(\"charger_voltage\")) === 2){\n        chargeType = `DC`;\n    }else{\n        chargeType = `AC ${(flow.get(\"charger_phases\") === \"1\")? 'monofásica' : 'trifásica'}`;\n        \n        voltage = `⚡️ Voltaje: ${flow.get(\"charger_voltage\")}V`;\n        amps = `⚡️ Intensidad: ${flow.get(\"charger_actual_current\")}A`;\n    }\n    \n    msg.topic = `*** Resumen carga ***\n    \n        🔌  Cargando en ${chargeType} a ${Math.abs(flow.get(\"power\"))}kW\n        🪫  ${bat}\n        🔋  Límite de carga ${flow.get(\"charge_limit_soc\")}%\n        ⌛️  Tiempo para finalizar carga: ${how_long} \n        ⏱  Hora de finalización carga: ${str_new_date}\n    `;\n\n    if (parseInt(flow.get(\"charger_voltage\")) !== 2) {\n        msg.topic += `    ${voltage}\n        ${amps}\n        🔋 ${flow.get(\"charge_energy_added\")}kWh añadidos\n        `;\n    }else{\n        msg.topic += `    🔋 ${flow.get(\"charge_energy_added\")}kWh añadidos\n        `;\n    }\n\n}else{\n    msg.topic = `*** Resumen carga ***\n    \n        🪫 ${bat}\n        🔋 Límite de carga ${flow.get(\"charge_limit_soc\")}%\n        🔋 ${flow.get(\"charge_energy_added\")}kWh añadidos en la última carga\n        🔌 Cable ${(flow.get(\"plugged_in\") === \"true\")? \"conectado\" : \"no conectado\"}\n    `;\n}\n\n\n\nreturn msg;",
+        "func": "/* temporarly disable */\n//return;\n\nlet state = flow.get(\"state\");\nlet bat = '';\nlet battery_level = flow.get('battery_level');\nlet usable_battery_level = flow.get('usable_battery_level');\n\nif (usable_battery_level !== battery_level){\n    bat = `Batería usable ${usable_battery_level}% (<i>${battery_level}%</i>) - ${flow.get('rated_battery_range_km')}km`;\n}else{\n    bat = `Batería disponible ${usable_battery_level}% - ${flow.get('rated_battery_range_km')}km`;\n}\n\nif (state === \"charging\"){\n\n    // Remaining\n    let time_to_full = flow.get(\"time_to_full_charge\");\n    let now = Math.round(Date.now()/1000);\n    let remaining = time_to_full.split('.');\n    let minutes = Math.ceil(60 * Number(\".\" + remaining[1]));\n    let total_minutes = (remaining[0]*60)+minutes;\n    let finish_date = Date.now() + (total_minutes*60000);\n    let new_date = new Date(finish_date);\n    let str_new_date = new_date.toLocaleTimeString('es-ES', {timeZone: 'Europe/Madrid', hour12: false, hour: '2-digit', minute: '2-digit' })\n    \n    let how_long = \"\";\n    if(remaining[0] > 0){\n        how_long = `${remaining[0]}h ${minutes}m`\n    } else {\n        how_long = `${minutes}m`\n    }\n    \n    let voltage = \"\";\n    let amps = \"\";\n    let chargeType = '';\n    if (parseInt(flow.get(\"charger_voltage\")) === 2){\n        chargeType = `DC`;\n    }else{\n        chargeType = `AC ${(flow.get(\"charger_phases\") === \"1\")? 'monofásica' : 'trifásica'}`;\n        \n        voltage = `⚡️ Voltaje: ${flow.get(\"charger_voltage\")}V`;\n        amps = `⚡️ Intensidad: ${flow.get(\"charger_actual_current\")}A`;\n    }\n    \n    msg.topic = `*** Resumen carga ***\n    \n        🔌  Cargando en ${chargeType} a ${Math.abs(flow.get(\"power\"))}kW\n        🪫  ${bat}\n        🔋  Límite de carga ${flow.get(\"charge_limit_soc\")}%\n        ⌛️  Tiempo para finalizar carga: ${how_long} \n        ⏰  Hora de finalización carga: ${str_new_date}\n    `;\n\n    if (parseInt(flow.get(\"charger_voltage\")) !== 2) {\n        msg.topic += `    ${voltage}\n        ${amps}\n        🔋 ${flow.get(\"charge_energy_added\")}kWh añadidos\n        `;\n    }else{\n        msg.topic += `    🔋 ${flow.get(\"charge_energy_added\")}kWh añadidos\n        `;\n    }\n\n}else{\n    msg.topic = `*** Resumen carga ***\n    \n        🪫 ${bat}\n        🔋 Límite de carga ${flow.get(\"charge_limit_soc\")}%\n        🔋 ${flow.get(\"charge_energy_added\")}kWh añadidos en la última carga\n        🔌 Cable ${(flow.get(\"plugged_in\") === \"true\")? \"conectado\" : \"no conectado\"}\n    `;\n}\n\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "// Code added here will be run once\n// whenever the node is deployed.",
@@ -663,14 +613,14 @@
         "y": 1280,
         "wires": [
             [
-                "9ef367904bb9e5b0"
+                "9091f925f8d0a46d"
             ]
         ]
     },
     {
-        "id": "538adce932478f78",
+        "id": "6a4696e8856db0c5",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "remove last messageId",
         "func": "//node.warn(\"messageId : \" + context.global.keyboard.messageId);\nif (context.global.keyboard.messageId !== undefined){\n    msg.payload.type = 'deleteMessage';\n    msg.payload.content = context.global.keyboard.messageId;\n    context.global.keyboard.messageId = null;\n}\n\nreturn [ msg ];",
         "outputs": 1,
@@ -682,14 +632,14 @@
         "y": 1160,
         "wires": [
             [
-                "dfd80d3d10d92b01"
+                "fd0defe14d8d826e"
             ]
         ]
     },
     {
-        "id": "370dd308bdb22164",
+        "id": "a372618373284919",
         "type": "telegram sender",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "send response",
         "bot": "ed12f72a.03fad",
         "haserroroutput": false,
@@ -701,9 +651,9 @@
         ]
     },
     {
-        "id": "feb401f202d66b98",
+        "id": "920747ae205dc8b1",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "save messageId",
         "func": "context.global.keyboard = { messageId : msg.payload.messageId };\n\nreturn [ msg ];",
         "outputs": 1,
@@ -715,14 +665,14 @@
         "y": 1120,
         "wires": [
             [
-                "538adce932478f78"
+                "6a4696e8856db0c5"
             ]
         ]
     },
     {
-        "id": "257876dce33b0fc6",
+        "id": "7b6729cd4369d53f",
         "type": "comment",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "Bot Telegram",
         "info": "",
         "x": 110,
@@ -730,9 +680,9 @@
         "wires": []
     },
     {
-        "id": "9ef367904bb9e5b0",
+        "id": "9091f925f8d0a46d",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "set buttons",
         "func": "let keyboards = {\n    'generic': {\n        \"inline_keyboard\": [\n            [\n                {\n                    \"text\": \"Resumen general\",\n                    \"callback_data\": \"summary_global\"            \n                },\n                {\n                    \"text\": `${(flow.get(\"state\") === \"charging\")? \"🟢\" : \"🔴\"} Resumen carga`,\n                    \"callback_data\": \"summary_recharge\"            \n                }\n            ]\n        ]\n    },\n    'controls': {\n        \"inline_keyboard\": [\n            [\n                {\n                    \"text\": \"Abrir coche\",\n                    \"callback_data\": \"controls_lock\"            \n                }\n            ],\n            [\n                {\n                    \"text\": `Frunk`,\n                    \"callback_data\": \"controls_frunk\"            \n                },\n                {\n                    \"text\": \"Maletero\",\n                    \"callback_data\": \"controls_trunk\"            \n                },\n                {\n                    \"text\": `Puerto de carga`,\n                    \"callback_data\": \"controls_charge_port\"            \n                }\n            ],\n            [\n                {\n                    \"text\": `Ráfaga luces`,\n                    \"callback_data\": \"controls_flash_lights\"            \n                },\n                {\n                    \"text\": \"Tocar claxon\",\n                    \"callback_data\": \"controls_honk_horn\"            \n                },\n                {\n                    \"text\": `Arrancar coche`,\n                    \"callback_data\": \"controls_remote_start\"            \n                }\n            ],\n            [\n                {\n                    \"text\": `Volver`,\n                    \"callback_data\": \"back\"\n                }\n            ]\n        ]\n    },\n    'security': {\n        \"inline_keyboard\": [\n            [\n                {\n                    \"text\": \"Resumen general\",\n                    \"callback_data\": \"resume\"            \n                },\n                {\n                    \"text\": `${(flow.get(\"state\") === \"charging\")? \"🟢\" : \"🔴\"} Resumen carga`,\n                    \"callback_data\": \"recharge\"            \n                }\n            ],\n            [\n                {\n                    \"text\": `Volver`,\n                    \"callback_data\": \"back\"\n                }\n            ]\n        ]\n    }\n};\n\nlet selectedKeyboard = {};\n\nif (keyboards[msg.payload.content] !== undefined){\n    selectedKeyboard = keyboards[msg.payload.content];\n}else{\n    selectedKeyboard = keyboards['generic'];\n}\n\nmsg.buttons = JSON.stringify(selectedKeyboard);\n\n\nreturn msg;",
         "outputs": 1,
@@ -744,30 +694,14 @@
         "y": 1340,
         "wires": [
             [
-                "aa2cd7c788d2fe79"
+                "b621667ba09219e2"
             ]
         ]
     },
     {
-        "id": "cb72f7ad246c9fb0",
-        "type": "link in",
-        "z": "88633c3e.1b273",
-        "name": "Actions switch",
-        "links": [
-            "dd9cba614f5c8adf"
-        ],
-        "x": 115,
-        "y": 1460,
-        "wires": [
-            [
-                "7de84f600fecf70c"
-            ]
-        ]
-    },
-    {
-        "id": "2b2b3ad91028850e",
+        "id": "6f5060a206a9e6d6",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "save messageId",
         "func": "context.global.keyboard = { messageId : msg.payload.messageId };\n\nreturn [ msg ];",
         "outputs": 1,
@@ -782,9 +716,9 @@
         ]
     },
     {
-        "id": "dfd80d3d10d92b01",
+        "id": "fd0defe14d8d826e",
         "type": "switch",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "",
         "property": "payload.content",
         "propertyType": "msg",
@@ -804,14 +738,14 @@
         "wires": [
             [],
             [
-                "370dd308bdb22164"
+                "a372618373284919"
             ]
         ]
     },
     {
-        "id": "c0e494e39beae256",
+        "id": "7697a10146e64a64",
         "type": "function",
-        "z": "88633c3e.1b273",
+        "z": "ec17eebe56a5b333",
         "name": "variables",
         "func": "\n// Telegram\nflow.set('telegram_chatId', 'XXXXXX');\n\n// ABRP\nflow.set('abrp_user_token', 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');\nflow.set('abrp_car_model', 'tesla:m3:20:bt37_21:heatpump');\nflow.set('abrp_api_key', '32b2162f-9599-4647-8139-66e9f9528370');\n\nreturn msg;",
         "outputs": 1,
@@ -823,7 +757,7 @@
         "y": 180,
         "wires": [
             [
-                "8b1b3799b71fb31f"
+                "111f31a1e35aefeb"
             ]
         ]
     },
